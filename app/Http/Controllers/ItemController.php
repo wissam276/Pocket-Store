@@ -8,8 +8,7 @@ use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-
+use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
 {
@@ -20,12 +19,6 @@ class ItemController extends Controller
     }
  
     
-public function show($id)
-    {
-        $item=Item::findOrFail($id);
-        return response()->json($item,200);
-    }
-
     public function destroy($id)
     {
         $item=Item::findOrFail($id);
@@ -55,10 +48,14 @@ public function itemsByCategory(Request $request)
 //-----------------------------------------------------------
     public function search(Request $request)
     {
-        $query = $request->input('query');
-        $items = Item::where('name', 'like', "%$query%")
-                     ->orWhere('description', 'like', "%$query%")
-                     ->get();
+        $searchQuery = $request->input('query');
+        $items = Item::where('accepted', 'accepted')
+                     ->where(function($q) use ($searchQuery) {
+                         $q->where('name', 'like', "%$searchQuery%")
+                           ->orWhere('description', 'like', "%$searchQuery%")
+                           ->orWhere('company', 'like', "%$searchQuery%");
+                     })->paginate(10);
+
         return response()->json($items, 200);
     }
 
@@ -147,5 +144,36 @@ public function itemsByCategory(Request $request)
         return response()->json($item, 200);
     }
 //--------------------------------------------------
+public function ItemsWithSales()
+    {
+        $items = Item::with('sales')->get();
+        return response()->json($items, 200);
+    }
+//----------------------------------------------------------------
+    public function topSelling()
+    {
+        $items = Item::where('accepted', 'accepted')
+                     ->orderBy('sales_count', 'desc')
+                     ->take(5)
+                     ->get();
 
+        return response()->json($items, 200);
+    }
+//-----------------------------------------------------------------------
+public function show($id)
+    {
+        $item = Item::findOrFail($id);
+        $item->item_image = asset(Storage::url($item->item_image));
+        
+        if($item->details_image) {
+            $images = [];
+            foreach(json_decode($item->details_image, true) ?? [] as $img) {
+                $images[] = asset(Storage::url($img));
+            }
+            $item->details_image = $images;
+        }
+
+        return response()->json($item, 200);
+    }
+  
 }

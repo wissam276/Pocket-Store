@@ -16,8 +16,10 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->text('description');
-            $table->decimal('price', 8, 2);
+            $table->text('short_description')->nullable(); 
+            $table->decimal('price', 10, 2); 
             $table->integer('quantity');
+            $table->integer('sales_count')->default(0); 
             $table->string('company');
             $table->enum('accepted', ['accepted', 'rejected', 'pending'])->default('pending');
             $table->decimal('priceAfterDiscount', 8, 2)->nullable();

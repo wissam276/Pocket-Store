@@ -32,8 +32,8 @@ class BasketController extends Controller
                     ->first();
 
     if ($basketItem) {
-        // تحديث الكمية (يمكن جمع الكمية الجديدة مع القديمة أو استبدالها)
-        $basketItem->quantity += $request->quantity; // أو $basketItem->quantity = $request->quantity;
+        
+        $basketItem->quantity += $request->quantity; 
         $basketItem->save();
     } else {
         $basketItem = Basket::create([
