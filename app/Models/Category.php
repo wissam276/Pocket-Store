@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-   use HasFactory;
-   protected $fillable=['name','description'];
-   protected $table='categories';
-   protected $primaryKey = 'id';
-   public function items(){
-       return $this->hasMany(Item::class);
-   }
+    use HasFactory;
+    protected $fillable=['name','description'];
+    protected $table='categories';
+    protected $primaryKey = 'id';
+    public function items(){
+        return $this->hasMany(Item::class);
+    }
 }

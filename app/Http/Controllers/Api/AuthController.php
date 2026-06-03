@@ -32,13 +32,13 @@ class AuthController extends Controller
       }
 
 
-      $user= User::create([
-          'first_name'=>$request->first_name,
-          'second_name'=>$request->second_name,
-          'email'=>$request->email,
-          'phone_number'=>$request->phone_number,
-          'password'=>Hash::make($request->password),
-          'role'=>'customer',
+      $user = User::create([
+          'first_name'   => $request->first_name,
+          'second_name'  => $request->second_name,
+          'email'        => $request->email,
+          'phone_number' => $request->phone_number, // هكذا نأخذ القيمة الحقيقية
+          'password'     => Hash::make($request->password),
+          'role'         => $request->role,         // هكذا نأخذ القيمة الحقيقية
       ]);
 
 

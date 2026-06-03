@@ -32,7 +32,7 @@ class UpdateItemRequest extends FormRequest
             'item_image' => 'sometimes|image|mimes:png,jpg,jpeg|max:2048',
             'details_image' => 'sometimes|array',
             'details_image.*' => 'image|mimes:png,jpg,jpeg|max:2048',
-            
+
         ];
     }
 }

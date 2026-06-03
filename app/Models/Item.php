@@ -9,14 +9,16 @@ class Item extends Model
 {
     /** @use HasFactory<\Database\Factories\ItemFactory> */
     use HasFactory;
-     protected $casts = [
+    protected $casts = [
         'details_image' => 'array',
     ];
     protected $fillable = ['name', 'description', 'price', 'quantity'
-    ,'priceAfterDiscount','DiscountPercentage','availability'
-    ,'category_id','item_image','details_image','company'
-    
-    
+        ,'priceAfterDiscount','DiscountPercentage','availability'
+       ,'category_id','accepted'
+        ,
+        'item_image','details_image','company'
+
+
     ];
     protected $primaryKey = 'id';
     public function category(){
@@ -24,5 +26,5 @@ class Item extends Model
     }
     public function baskets(){
         return $this->hasMany(Basket::class);
-    }   
+    }
 }

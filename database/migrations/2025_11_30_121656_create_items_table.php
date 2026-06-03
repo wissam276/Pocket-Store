@@ -13,19 +13,23 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            // جعل الحقل مجرد رقم عادي يقبل القيم الفارغة (Nullable) وغير مرتبط بقيد
+           // $table->unsignedBigInteger('category_id')->nullable();
+           $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->text('description');
-            $table->decimal('price', 8, 2);
+            $table->text('short_description')->nullable();
+            $table->decimal('price', 10, 2);
             $table->integer('quantity');
-            $table->string('company');
+            $table->integer('sales_count')->default(0);
+            $table->string('company')->nullable();
             $table->enum('accepted', ['accepted', 'rejected', 'pending'])->default('pending');
             $table->decimal('priceAfterDiscount', 8, 2)->nullable();
             $table->decimal('DiscountPercentage', 5, 2)->nullable();
             $table->boolean('availability')->default(true);
-         // Media
-        $table->string( 'item_image');
-        $table->json( 'details_image');
+            // Media
+            $table->string( 'item_image');
+            $table->json( 'details_image');
 
             $table->timestamps();
 

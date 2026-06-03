@@ -14,7 +14,7 @@ class CategoryController extends Controller
         $catregories=Category::all();
         return response()->json($catregories,200);
     }
- 
+
     public function store(StoreCategoryRequest $request)
     {
         $category=Category::create($request->validated());

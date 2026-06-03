@@ -11,7 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['first_name',
+#[Fillable([
+    'first_name',
     'second_name',
     'email',
     'phone_number',
@@ -37,5 +38,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // أضف هذه الدالة داخل موديل User
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->second_name}";
     }
 }
