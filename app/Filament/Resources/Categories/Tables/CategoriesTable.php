@@ -22,7 +22,7 @@ class CategoriesTable
                     ->searchable(),
                 ImageColumn::make('image')
                     ->label('الصورة')
-                    ->circular(), // لجعل الصورة دائرية (اختياري)
+                    ->circular(),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')

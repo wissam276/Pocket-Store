@@ -39,7 +39,6 @@ class User extends Authenticatable
         ];
     }
 
-    // أضف هذه الدالة داخل موديل User
     public function getNameAttribute(): string
     {
         return "{$this->first_name} {$this->second_name}";

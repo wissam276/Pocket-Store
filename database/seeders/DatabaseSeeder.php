@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. إنشاء المستخدمين
+
         User::factory()->create([
             'first_name' => 'wissam',
             'second_name' => 'admin',
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
         ]);
         User::factory(3)->create(['role' => 'customer']);
 
-        // 2. إنشاء التصنيفات (حلقة واحدة فقط)
+
         foreach (Category::DEFAULT_CATEGORIES as $name) {
             $category = Category::create([
                 'name' => trim($name),
@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
                 'description' => 'وصف افتراضي لـ ' . $name,
             ]);
 
-            // 3. إنشاء العناصر وربطها بالتصنيف الحالي
+
             Item::factory()
-                ->count(3) // إنشاء 3 عناصر لكل تصنيف
+                ->count(3)
                 ->create([
                     'category_id' => $category->id,
                 ]);

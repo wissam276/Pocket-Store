@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {use HasFactory;
 
-    // تعريف القائمة كـ ثوابت
     public const DEFAULT_CATEGORIES = [
         'Electronics '
         , 'Computer Accessories'

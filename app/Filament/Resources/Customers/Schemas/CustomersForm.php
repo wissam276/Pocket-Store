@@ -27,7 +27,7 @@ class CustomersForm
                         ->label('البريد الإلكتروني')
                         ->email()
                         ->required()
-                        ->unique(ignoreRecord: true), // يتجاهل العميل الحالي عند التعديل
+                        ->unique(ignoreRecord: true),
 
                     TextInput::make('phone_number')
                         ->label('رقم الهاتف')
@@ -40,9 +40,9 @@ class CustomersForm
                     TextInput::make('password')
                         ->label('كلمة المرور')
                         ->password()
-                        ->dehydrated(fn ($state) => filled($state)) // لا يحفظها إذا كانت فارغة
+                        ->dehydrated(fn ($state) => filled($state))
                         ->required(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord) // مطلوبة عند الإنشاء فقط
-                        ->revealable(), // زر لإظهار/إخفاء كلمة المرور
+                        ->revealable(),
                 ]),
         ]);
     }

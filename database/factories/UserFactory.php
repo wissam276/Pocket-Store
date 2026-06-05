@@ -26,10 +26,10 @@ class UserFactory extends Factory
     {
         return [
             'first_name'   => fake()->firstName(),
-            'second_name'  => fake()->lastName(), // تأكد أنه تم تعديل المفتاح هنا أيضاً ليكون second_name بدلاً من last_name
-            'email' => fake()->unique()->safeEmail(), // استخدام unique() يمنع التكرار
+            'second_name'  => fake()->lastName(),
+            'email' => fake()->unique()->safeEmail(),
             'password'     => static::$password ??= Hash::make('password'),
-            'phone_number' => fake()->unique()->phoneNumber(), // استخدام unique() يمنع التكرار
+            'phone_number' => fake()->unique()->phoneNumber(),
             'remember_token' => Str::random(10),
         ];
     }

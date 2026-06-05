@@ -36,9 +36,9 @@ class ItemForm
                         TextInput::make('slug')
                             ->label('الرابط (Slug)')
                             ->required()
-                            ->unique(ignoreRecord: true), // لضمان عدم تكرار الرابط في قاعدة البيانات
+                            ->unique(ignoreRecord: true),
 
-                        // الحقل المطلوب: category_id كـ Select مرتبط بجدول التصنيفات
+
                         Select::make('category_id')
                             ->label('التصنيف')
                             ->relationship('category', 'name')
@@ -85,7 +85,7 @@ class ItemForm
                             ->required(),
                         FileUpload::make('details_image')
                             ->label('صور إضافية')
-                            ->multiple() // يتعامل مع JSON بشكل ممتاز
+                            ->multiple()
                             ->image(),
                     ]),
 

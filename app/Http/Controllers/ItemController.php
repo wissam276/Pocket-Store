@@ -22,8 +22,6 @@ class ItemController extends Controller
 
     public function destroy(Item $item)
     {
-        // حذف الصورة من الـ storage قبل حذف السجل (اختياري لكن احترافي)
-        // Storage::disk('public')->delete($item->item_image);
 
         $item->delete();
 
@@ -93,7 +91,6 @@ class ItemController extends Controller
 //--------------------------------------------------
     public function store(Request $request)
     {
-        // 1. التحقق من صحة البيانات (مطابقة للـ Schema)
         $validated = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|unique:items,slug',
@@ -108,8 +105,8 @@ class ItemController extends Controller
             'DiscountPercentage' => 'nullable|numeric',
             'availability' => 'boolean',
             'item_image' => 'required|image|max:2048',
-            'details_image' => 'nullable|array', // مصفوفة صور
-            'details_image.*' => 'image|max:2048', // التحقق من كل صورة
+            'details_image' => 'nullable|array',
+            'details_image.*' => 'image|max:2048',
         ]);
 
         // 2. معالجة رفع الصور
@@ -122,14 +119,13 @@ class ItemController extends Controller
             foreach ($request->file('details_image') as $image) {
                 $paths[] = $image->store('items/details', 'public');
             }
-            // Filament يخزن الصور المتعددة كـ JSON تلقائياً في قاعدة البيانات
             $validated['details_image'] = json_encode($paths);
         }
 
         // 3. إنشاء المنتج
         $item = Item::create($validated);
 
-        // 4. إرجاع الرد بصيغة الـ Resource الموحد
+
         return new ItemApiResource($item);
     }
 
@@ -140,7 +136,6 @@ class ItemController extends Controller
 //--------------------------------------------------
     public function update(Request $request, Item $item)
     {
-        // التحقق من البيانات (نفس قواعد الـ store تقريباً)
         $validated = $request->validate([
             'name' => 'sometimes|string',
             'price' => 'sometimes|numeric',
@@ -155,13 +150,13 @@ class ItemController extends Controller
             'DiscountPercentage' => 'sometimes|nullable|numeric',
             'availability' => 'sometimes|boolean',
             'item_image' => 'sometimes|image|max:2048',
-            'details_image' => 'sometimes|nullable|array', // مصفوفة صور
-            'details_image.*' => 'sometimes|image|max:2048', // التحقق من كل صورة
+            'details_image' => 'sometimes|nullable|array',
+            'details_image.*' => 'sometimes|image|max:2048',
         ]);
 
-        // معالجة الصور في حال تم إرسال صورة جديدة
+
         if ($request->hasFile('item_image')) {
-            // ملاحظة: يُفضل هنا حذف الصورة القديمة من الـ storage قبل رفع الجديدة
+
             $validated['item_image'] = $request->file('item_image')->store('items', 'public');
         }
 
@@ -198,7 +193,6 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
-        // $item هنا تم جلبه تلقائياً بواسطة لارافيل، لا حاجة لـ Item::find($id)
         return new ItemApiResource($item);
     }
 
