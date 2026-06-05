@@ -15,10 +15,42 @@ class CategoryController extends Controller
         return response()->json($catregories,200);
     }
 
-    public function store(StoreCategoryRequest $request)
+    public function store(Request $request)
     {
-        $category=Category::create($request->validated());
-        return response()->json($category,201);
+        $validated = $request->validate([
+            'name'  => 'required|string|max:255',
+            'slug'  => 'required|string|unique:categories,slug',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        // معالجة رفع الصورة إذا وجدت
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('categories', 'public');
+            $validated['image'] = $path;
+        }
+
+        $category = Category::create($validated);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'تم إنشاء التصنيف بنجاح',
+            'data' => $category
+        ], 201);
+    }
+
+    public function update(Request $request, Category $category){
+        $validated = $request->validate([
+            'name'  => 'sometimes|string|max:255',
+            'slug'  => 'sometimes|string|unique:categories,slug',
+            'image' => 'sometimes|nullable|image|max:2048',
+        ]);
+        $category->update($validated);
+
+        return response()->json([
+            'status' => true,
+            'message'=>"edited successfully"
+
+        ],200);
     }
     public function show($id)
     {

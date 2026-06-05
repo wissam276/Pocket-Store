@@ -6,34 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-
+use App\Models\Category;
+use App\Models\Order;
 
 class AdminController extends Controller
 {
-    public function acceptItem(Request $request)
-    {
-        $user=Auth::user();
-        $request->validate([
-            'item_id' => 'required|exists:items,id',
-        ]);
-        $id = $request->input('item_id');
-        $item = Item::findOrFail($id);
-        $item->accepted = 'accepted';
-        $item->save();
-        return response()->json($item, 200);
-    }
-//--------------------------------------------------
-    public function rejectItem(Request $request)
-    {
-        $user=Auth::user();
-        $request->validate([
-            'item_id' => 'required|exists:items,id',
-        ]);
-        $id = $request->input('item_id');
-        $item = Item::findOrFail($id);
-        $item->accepted = 'rejected';
-        $item->save();
-        return response()->json($item, 200);}
+
 //-------------------------------------------------
     public function toggleUserStatus(Request $request)
     {
@@ -57,10 +35,25 @@ class AdminController extends Controller
         return response()->json([
             'total_customers' => User::where('role', 'customer')->count(),
             'total_products' => Item::count(),
-            'pending_products' => Item::where('accepted', 'pending')->count(),
+            'total_orders'=>Order::count(),
             'low_stock_products' => Item::where('quantity', '<', 5)->get(),
+
         ], 200);
     }
 //---------------------------------------------------------------------
 
+
+public function listUsers(){
+
+        $users = User::where('is_admin',false)
+            ->select(['id','name','email','role','is_active','created_at'])
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $users,
+            'status' => 200,
+            'users' => User::all()
+        ]);
+}
 }

@@ -12,7 +12,7 @@ class Item extends Model
     protected $casts = [
         'details_image' => 'array',
     ];
-    protected $fillable = ['name', 'description', 'price', 'quantity'
+    protected $fillable = ['name', 'description','slug','category', 'price', 'quantity'
         ,'priceAfterDiscount','DiscountPercentage','availability'
        ,'category_id','accepted'
         ,
@@ -24,6 +24,7 @@ class Item extends Model
     public function category(){
         return $this->belongsTo(Category::class);
     }
+
     public function baskets(){
         return $this->hasMany(Basket::class);
     }

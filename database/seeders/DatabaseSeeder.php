@@ -3,11 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Factories\ItemFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Category;
 use App\Models\Item;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,25 +20,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. إنشاء مستخدم الفحص الثابت (مع تعديل second_name)
+        // 1. إنشاء المستخدمين
         User::factory()->create([
-            'first_name' => 'Test',
-            'second_name' => 'User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password'),
-            'phone_number' => '123456789',
+            'first_name' => 'wissam',
+            'second_name' => 'admin',
+            'email'=>'wissam@ecommerce.com',
+            'password'=>Hash::make('password'),
+            'phone_number'=>'0123456789',
+            'role'=>'admin',
         ]);
+        User::factory(3)->create(['role' => 'customer']);
 
-        // 2. إنشاء مستخدمين عشوائيين آخرين (مثلاً 5 مستخدمين)
-        User::factory(5)->create();
+        // 2. إنشاء التصنيفات (حلقة واحدة فقط)
+        foreach (Category::DEFAULT_CATEGORIES as $name) {
+            $category = Category::create([
+                'name' => trim($name),
+                'slug' => Str::slug($name),
+                'description' => 'وصف افتراضي لـ ' . $name,
+            ]);
 
-        // 3. إنشاء أصناف حقيقية وهمية لمتجرك
-        $categories = ['Monitors', 'Keyboards', 'Mice', 'Headsets', 'Graphic Cards'];
-        foreach ($categories as $category) {
-            Category::create(['name' => $category]);
+            // 3. إنشاء العناصر وربطها بالتصنيف الحالي
+            Item::factory()
+                ->count(3) // إنشاء 3 عناصر لكل تصنيف
+                ->create([
+                    'category_id' => $category->id,
+                ]);
         }
 
-        // 4. توليد 30 منتج وهمي من المنتجات الواقعية التي جهزناها في الفاكتوري
-        Item::factory(30)->create();
     }
 }

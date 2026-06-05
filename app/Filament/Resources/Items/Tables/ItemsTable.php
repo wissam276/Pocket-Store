@@ -22,24 +22,19 @@ class ItemsTable
                     ->label('price')
                     ->money('SAR'),
 
-                \Filament\Tables\Columns\TextColumn::make('accepted')
-                    ->label('Status')
-                    ->sortable()
-                // أضف أي حقول أخرى تحتاجها
-            ])
-            ->filters([
-                Filter::make('Pending Acceptance')
-                    ->query(fn (Builder $query): Builder => $query->where('accepted', 'pending')),
 
-                Filter::make('Accepted')
-                    ->query(fn (Builder $query): Builder => $query->where('accepted', 'accepted')),
+                \Filament\Tables\Columns\TextColumn::make('category.name') // الوصول للعلاقة
+                ->label('Category')
+                    ->sortable(),
 
-                Filter::make('Rejected')
-                    ->query(fn (Builder $query): Builder => $query->where('accepted', 'rejected')),
+
             ])
+
             ->actions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
+
+
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

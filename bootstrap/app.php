@@ -17,7 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // 2. تسجيل الـ Aliases للممررين معاً
         $middleware->alias([
-            'company' => CompanyMiddleware::class,
             'admin'   => AdminMiddleware::class, // أضفنا هذا السطر هنا
         ]);
 

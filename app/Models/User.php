@@ -17,7 +17,6 @@ use Laravel\Sanctum\HasApiTokens;
     'email',
     'phone_number',
     'address',
-    'role',
     'password',])]
 
 
@@ -45,4 +44,5 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->second_name}";
     }
+
 }

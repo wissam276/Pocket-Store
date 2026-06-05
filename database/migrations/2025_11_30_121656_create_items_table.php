@@ -14,16 +14,14 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            // جعل الحقل مجرد رقم عادي يقبل القيم الفارغة (Nullable) وغير مرتبط بقيد
-           // $table->unsignedBigInteger('category_id')->nullable();
-           $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
+            $table->string('slug')->unique();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->text('description');
             $table->text('short_description')->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('quantity');
             $table->integer('sales_count')->default(0);
             $table->string('company')->nullable();
-            $table->enum('accepted', ['accepted', 'rejected', 'pending'])->default('pending');
             $table->decimal('priceAfterDiscount', 8, 2)->nullable();
             $table->decimal('DiscountPercentage', 5, 2)->nullable();
             $table->boolean('availability')->default(true);

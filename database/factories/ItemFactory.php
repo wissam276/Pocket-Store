@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Item>
@@ -17,9 +18,11 @@ class ItemFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->unique()->words(2, true);
         return [
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
+            'slug' => Str::slug($name),
             'price' => $this->faker->randomFloat(2, 10, 500), // سعر بين 10 و 500
             'quantity' => $this->faker->numberBetween(1, 100),
             'category_id' => $this->faker->numberBetween(1, 10), // أرقام عشوائية للأصناف

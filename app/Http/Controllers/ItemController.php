@@ -5,26 +5,33 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateItemRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
+use App\Http\Resources\ItemApiResource;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Filament\Resources\Items\ItemResource;
 
 class ItemController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $Items=Item::all();
-        return response()->json($Items,200);
+        return ItemApiResource::collection(Item::with('category')->paginate(10));
     }
 
 
-    public function destroy($id)
+    public function destroy(Item $item)
     {
-        $item=Item::findOrFail($id);
+        // حذف الصورة من الـ storage قبل حذف السجل (اختياري لكن احترافي)
+        // Storage::disk('public')->delete($item->item_image);
+
         $item->delete();
-        return response()->json(null,204);
+
+        return response()->json([
+            'message' => 'تم حذف المنتج بنجاح'
+        ], 200);
     }
+
 
 
 
@@ -84,69 +91,90 @@ class ItemController extends Controller
         return response()->json($item, 200);
     }
 //--------------------------------------------------
-    public function store(CreateItemRequest $request)
+    public function store(Request $request)
     {
-        $validatedData = $request->validated();
-
-        unset($validatedData['item_image'], $validatedData['details_image']);
-
-        // تخزين الصورة الرئيسية
-        if ($request->hasFile('item_image')) {
-            $validatedData['item_image'] = $request->file('item_image')->store('public', 'public');
-        }
-
-        // تخزين صور التفاصيل
-        if ($request->hasFile('details_image')) {
-            $images = [];
-            foreach ($request->file('details_image') as $image) {
-                $images[] = $image->store('public', 'public');
-            }
-            $validatedData['details_image'] = json_encode($images);
-        }
-
-        // الفحص الدفاعي: يمنع خطأ الـ null تماماً
-        $validatedData['company'] = Auth::check() ? Auth::user()->name : 'Default Company';
-
-        $item = Item::create($validatedData);
-
-        return response()->json($item, 201);
-    }
-//--------------------------------------------------
-    public function update(UpdateItemRequest $request)
-
-    {
-
-        $request->validate([
-            'item_id' => 'required|exists:items,id',
+        // 1. التحقق من صحة البيانات (مطابقة للـ Schema)
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'slug' => 'required|unique:items,slug',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric',
+            'quantity' => 'required|numeric',
+            'short_description' => 'nullable|string',
+            'description' => 'required|string',
+            'sales_count' => 'nullable|numeric',
+            'company' => 'nullable|string',
+            'priceAfterDiscount' => 'nullable|numeric',
+            'DiscountPercentage' => 'nullable|numeric',
+            'availability' => 'boolean',
+            'item_image' => 'required|image|max:2048',
+            'details_image' => 'nullable|array', // مصفوفة صور
+            'details_image.*' => 'image|max:2048', // التحقق من كل صورة
         ]);
-        $id = $request->input('item_id');
-        $item = Item::findOrFail($id);
-        if($item->company !== Auth::user()->name) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-        $validatedData = $request->validated();
 
-        unset($validatedData['item_image'], $validatedData['details_image']);
-
-        // Update main item image if provided
+        // 2. معالجة رفع الصور
         if ($request->hasFile('item_image')) {
-            $validatedData['item_image'] =
-                $request->file('item_image')->store('public', 'public');
+            $validated['item_image'] = $request->file('item_image')->store('items', 'public');
         }
 
-        // Update details images if provided
         if ($request->hasFile('details_image')) {
-            $images = [];
+            $paths = [];
             foreach ($request->file('details_image') as $image) {
-                $images[] = $image->store('public', 'public');
+                $paths[] = $image->store('items/details', 'public');
             }
-            $validatedData['details_image'] = $images;
+            // Filament يخزن الصور المتعددة كـ JSON تلقائياً في قاعدة البيانات
+            $validated['details_image'] = json_encode($paths);
         }
 
-        $item->update($validatedData);
-        return response()->json($item, 200);
+        // 3. إنشاء المنتج
+        $item = Item::create($validated);
+
+        // 4. إرجاع الرد بصيغة الـ Resource الموحد
+        return new ItemApiResource($item);
     }
+
+
+
+
+
 //--------------------------------------------------
+    public function update(Request $request, Item $item)
+    {
+        // التحقق من البيانات (نفس قواعد الـ store تقريباً)
+        $validated = $request->validate([
+            'name' => 'sometimes|string',
+            'price' => 'sometimes|numeric',
+            'slug' => 'sometimes|unique:items,slug',
+            'category_id' => 'sometimes|required|exists:categories,id',
+            'quantity' => 'sometimes|numeric',
+            'short_description' => 'sometimes|nullable|string',
+            'description' => 'sometimes|string',
+            'sales_count' => 'sometimes|nullable|numeric',
+            'company' => 'sometimes|nullable|string',
+            'priceAfterDiscount' => 'sometimes|nullable|numeric',
+            'DiscountPercentage' => 'sometimes|nullable|numeric',
+            'availability' => 'sometimes|boolean',
+            'item_image' => 'sometimes|image|max:2048',
+            'details_image' => 'sometimes|nullable|array', // مصفوفة صور
+            'details_image.*' => 'sometimes|image|max:2048', // التحقق من كل صورة
+        ]);
+
+        // معالجة الصور في حال تم إرسال صورة جديدة
+        if ($request->hasFile('item_image')) {
+            // ملاحظة: يُفضل هنا حذف الصورة القديمة من الـ storage قبل رفع الجديدة
+            $validated['item_image'] = $request->file('item_image')->store('items', 'public');
+        }
+
+        $item->update($validated);
+
+        return new ItemApiResource($item);
+    }
+
+
+
+
+
+
     public function ItemsWithSales()
     {
         $items = Item::with('sales')->get();
@@ -163,20 +191,15 @@ class ItemController extends Controller
         return response()->json($items, 200);
     }
 //-----------------------------------------------------------------------
-    public function show($id)
+
+
+
+
+
+    public function show(Item $item)
     {
-        $item = Item::findOrFail($id);
-        $item->item_image = asset(Storage::url($item->item_image));
-
-        if($item->details_image) {
-            $images = [];
-            foreach(json_decode($item->details_image, true) ?? [] as $img) {
-                $images[] = asset(Storage::url($img));
-            }
-            $item->details_image = $images;
-        }
-
-        return response()->json($item, 200);
+        // $item هنا تم جلبه تلقائياً بواسطة لارافيل، لا حاجة لـ Item::find($id)
+        return new ItemApiResource($item);
     }
 
 }

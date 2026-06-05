@@ -27,13 +27,12 @@ class UserFactory extends Factory
         return [
             'first_name'   => fake()->firstName(),
             'second_name'  => fake()->lastName(), // تأكد أنه تم تعديل المفتاح هنا أيضاً ليكون second_name بدلاً من last_name
-            'email'        => fake()->unique()->safeEmail(),
+            'email' => fake()->unique()->safeEmail(), // استخدام unique() يمنع التكرار
             'password'     => static::$password ??= Hash::make('password'),
-            'phone_number' => fake()->phoneNumber(),
+            'phone_number' => fake()->unique()->phoneNumber(), // استخدام unique() يمنع التكرار
             'remember_token' => Str::random(10),
         ];
     }
-
     /**
      * Indicate that the model's email address should be unverified.
      */
