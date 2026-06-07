@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Items\Tables;
 
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,19 @@ class ItemsTable
                 \Filament\Tables\Columns\TextColumn::make('category.name') // الوصول للعلاقة
                 ->label('Category')
                     ->sortable(),
+
+
+//                \Filament\Tables\Columns\TextColumn::make('availability')
+//                    ->label('availability')
+//                    ->sortable(),
+
+
+                \Filament\Tables\Columns\IconColumn::make('availability')
+                ->label('availability')
+                ->boolean()
+                ->sortable(),
+
+
 
 
             ])

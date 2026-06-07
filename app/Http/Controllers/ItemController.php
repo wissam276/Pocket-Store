@@ -109,7 +109,6 @@ class ItemController extends Controller
             'details_image.*' => 'image|max:2048',
         ]);
 
-        // 2. معالجة رفع الصور
         if ($request->hasFile('item_image')) {
             $validated['item_image'] = $request->file('item_image')->store('items', 'public');
         }
@@ -178,9 +177,8 @@ class ItemController extends Controller
 //----------------------------------------------------------------
     public function topSelling()
     {
-        $items = Item::where('accepted', 'accepted')
-            ->orderBy('sales_count', 'desc')
-            ->take(5)
+        $items = Item::orderBy('sales_count', 'desc')
+            ->limit(5)
             ->get();
 
         return response()->json($items, 200);

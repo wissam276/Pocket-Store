@@ -14,7 +14,7 @@ class ItemApiResource extends JsonResource
             'name' => $this->name,
             'price' => $this->price,
             'image_url' => asset('storage/' . $this->item_image),
-            'category' => $this->category ? $this->category->name : null, // حماية في حال كان التصنيف فارغاً
+            'category' => $this->category ? $this->category->name : null,
         ];
     }
 }

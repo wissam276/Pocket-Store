@@ -13,10 +13,8 @@ class CategoryApiResource extends JsonResource
             'id'    => $this->id,
             'name'  => $this->name,
             'slug'  => $this->slug,
-            // إذا كانت لديك صورة للتصنيف، أضفها هنا
             'image_url' => $this->image ? asset('storage/' . $this->image) : null,
 
-            // يمكنك إضافة عدد المنتجات داخل كل تصنيف (اختياري)
             'items_count' => $this->whenLoaded('items', function () {
                 return $this->items->count();
             }),

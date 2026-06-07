@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Order;
+use App\Models\orderItems;
 use App\Models\User;
 use Database\Factories\ItemFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -31,12 +33,11 @@ class DatabaseSeeder extends Seeder
         ]);
         User::factory(3)->create(['role' => 'customer']);
 
-
         foreach (Category::DEFAULT_CATEGORIES as $name) {
             $category = Category::create([
                 'name' => trim($name),
                 'slug' => Str::slug($name),
-                'description' => 'وصف افتراضي لـ ' . $name,
+                'description' => 'virtual description ' . $name,
             ]);
 
 
@@ -46,6 +47,12 @@ class DatabaseSeeder extends Seeder
                     'category_id' => $category->id,
                 ]);
         }
+
+
+
+        \App\Models\Order::factory(10)
+            ->withItems(3)
+            ->create();
 
     }
 }

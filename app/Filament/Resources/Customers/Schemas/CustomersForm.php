@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Customers\Schemas;
 
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -44,6 +46,30 @@ class CustomersForm
                         ->required(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord) // مطلوبة عند الإنشاء فقط
                         ->revealable(),
                 ]),
+
+
+            Section::make('المنتجات في الطلب')
+                ->schema([
+                    Repeater::make('orderItems')
+                        ->relationship()
+                        ->schema([
+                            Select::make('product_id')
+                                ->relationship('Item', 'name')
+                                ->required(),
+
+                            TextInput::make('quantity')
+                                ->numeric()
+                                ->default(1)
+                                ->required(),
+
+                            TextInput::make('price')
+                                ->numeric()
+                                ->prefix('SAR')
+                                ->required(),
+                        ])
+                        ->columns(3)
+                        ->collapsible(),
+                ])
         ]);
     }
 }

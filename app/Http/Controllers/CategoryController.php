@@ -23,7 +23,6 @@ class CategoryController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
-        // معالجة رفع الصورة إذا وجدت
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('categories', 'public');
             $validated['image'] = $path;
@@ -33,7 +32,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'تم إنشاء التصنيف بنجاح',
+            'message' => 'new category created successfully',
             'data' => $category
         ], 201);
     }

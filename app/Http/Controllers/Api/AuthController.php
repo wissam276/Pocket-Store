@@ -38,7 +38,7 @@ class AuthController extends Controller
           'email'        => $request->email,
           'phone_number' => $request->phone_number,
           'password'     => Hash::make($request->password),
-          'role'         => $request->role,
+//          'role'         => $request->role,
       ]);
 
 
@@ -86,4 +86,31 @@ class AuthController extends Controller
           'message'=>"logout succesfuly",
       ],200);
   }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'first_name'  => 'sometimes|string|max:255',
+            'second_name'  => 'sometimes|string|max:255',
+            'phone_number'  => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:8',
+        ]);
+
+        if ($request->has('first_name')) $user->first_name  = $request->first_name;
+        if ($request->has('second_name')) $user->second_name = $request->second_name;
+        if ($request->has('phone_number')) $user->phone_number = $request->phone_number;
+        if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('password')) $user->password = bcrypt($request->password);
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'your data has been updated successfully',
+            'user'    => $user
+        ]);
+    }
 }

@@ -26,7 +26,6 @@ class CreateItemRequest extends FormRequest
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
-            'category_id' => 'nullable|integer', // أو 'required|integer' إذا كان الحقل إجبارياً ولكن بدون exists
             'category_id' => 'required',
             'priceAfterDiscount' => 'nullable|numeric|min:0',
             'DiscountPercentage' => 'nullable|numeric|min:0|max:100',

@@ -4,6 +4,7 @@
 namespace App\Filament\Widgets;
 
 
+use App\Models\Order;
 use App\Models\User;
 use App\Models\Item; // أو اسم الموديل لديك إذا كان Item
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -35,6 +36,17 @@ class ShopOverview extends BaseWidget
             ->color('warning'),
 
 
+
+            Stat::make('Ordrers Count',Order::count())
+                ->description("Total number of products")
+                ->descriptionIcon('heroicon-m-shopping-cart')
+                ->color('success'),
+
+
+            Stat::make(' Pending Ordrers Count',Order::where('status','pending')->count())
+                ->description("Total number of products")
+                ->descriptionIcon('heroicon-m-shopping-cart')
+                ->color('hec'),
         ];
 
     }

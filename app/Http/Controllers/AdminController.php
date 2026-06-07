@@ -22,12 +22,12 @@ class AdminController extends Controller
 
         $user = User::findOrFail($request->user_id);
         if($user->id === Auth::id()) {
-            return response()->json(['message' => 'لا يمكنك حظر حسابك الشخصي'], 403);
+            return response()->json(['message' => 'you cannot block '], 403);
         }
         $user->is_active = $request->is_active;
         $user->save();
 
-        return response()->json(['message' => 'تم تحديث حالة المستخدم بنجاح'], 200);
+        return response()->json(['message' => 'user status updated successfully'], 200);
     }
 //-------------------------------------------------
     public function dashboardStats()

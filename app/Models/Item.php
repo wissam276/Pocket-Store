@@ -14,11 +14,7 @@ class Item extends Model
     ];
     protected $fillable = ['name', 'description','slug','category', 'price', 'quantity'
         ,'priceAfterDiscount','DiscountPercentage','availability'
-       ,'category_id','accepted'
-        ,
-        'item_image','details_image','company'
-
-
+       ,'category_id','accepted','item_image','details_image','company'
     ];
     protected $primaryKey = 'id';
     public function category(){
