@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -13,46 +14,48 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-  public function register(Request $request){
-      $validator = Validator::make($request->all(),[
-          'first_name' => 'required',
-          'second_name' => 'required',
-          'email' => 'required|email|unique:users',
-          'password' => 'required|min:6|max:20|confirmed',
-          'password_confirmation' => 'required|min:6|max:20',
-          'phone_number' => 'required|unique:users'
-      ]);
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'second_name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|max:20|confirmed',
+            'phone_number' => 'required|unique:users',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-      if($validator->fails()){
-          return response()->json([
-              'status'=>false,
-              'message'=>"check of the data ..",
-              'errors'=>$validator->errors()
-              ],422);
-      }
-
-
-      $user = User::create([
-          'first_name'   => $request->first_name,
-          'second_name'  => $request->second_name,
-          'email'        => $request->email,
-          'phone_number' => $request->phone_number,
-          'password'     => Hash::make($request->password),
-//          'role'         => $request->role,
-      ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => "please check all fields",
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
 
-    $token=$user->createToken('auth_token')->plainTextToken;
+        $data = $request->except('avatar', 'password', 'password_confirmation');
+        $data['password'] = Hash::make($request->password);
 
-    return response()->json([
-        'status'=>true,
-        'message'=>"account created succesfuly",
-        'user'=>$user,
-        'access_token'=>$token,
-        'token_type'=>'Bearer',
-    ],201);
 
-  }
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = $path;
+        }
+
+
+        $user = User::create($data);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => "Account has been created successfully",
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], 201);
+    }
 
   public function login(Request $request)
   {
@@ -86,6 +89,42 @@ class AuthController extends Controller
           'message'=>"logout succesfuly",
       ],200);
   }
+
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        // إرسال رابط إعادة التعيين (يستخدم الإعدادات في config/auth.php)
+        $status = Password::sendResetLink($request->only('email'));
+
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['message' => 'تم إرسال رابط إعادة التعيين إلى بريدك'])
+            : response()->json(['message' => 'حدث خطأ أثناء الإرسال'], 400);
+    }
+
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? response()->json(['message' => 'password reset succesfuly'])
+            : response()->json(['message' => 'Token is invalid or expired'], 400);
+    }
+
 
     public function updateProfile(Request $request)
     {

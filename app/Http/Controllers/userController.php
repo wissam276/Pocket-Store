@@ -23,8 +23,15 @@ class userController extends Controller
             'phone_number' => 'required|unique:users|min:10|max:10',
             'email' => 'required|unique:users|email',
             'password' => 'required|min:8',
+            'avatar' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $validated['password'] = Hash::make($validated['password']);
+
+
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
         $user = User::create($validated);
         return response()->json([
             'success' => true,
@@ -43,7 +50,8 @@ class userController extends Controller
                 'phone_number' => $user->phone_number,
                 'email' => $user->email,
                 'password' => $user->password,
-                'role' => $user->role,
+                'avatar' => $user->avatar ? asset('storage/' . $user->avatar) : null,
+                 'role' => $user->role,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
                 'is_active' => $user->is_active,
@@ -58,12 +66,33 @@ class userController extends Controller
     {
         $validated = $request->validate([
             'first_name' => 'sometimes|string|required',
-            'second_name' => 'required',
-            'phone_number' => 'required|unique:users|min:10|max:10',
-            'email' => 'required|email',
-            'password' => 'required|min:8',
+            'second_name' => 'sometimes',
+            'phone_number' => 'sometimes|min:10|max:10|unique:users,phone_number,' . $user->id,
+            'email'        => 'sometimes|email|unique:users,email,' . $user->id,
+            'password'     => 'sometimes|min:8',
+            'avatar' => 'sometimes|image',
+        ]);
+
+        // معالجة كلمة السر إذا تم إرسالها
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
+
+        // معالجة الصورة
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        // هنا الخطوة التي كانت ناقصة:
+        $user->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'updated successfully',
+            'data' => $user
         ]);
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -21,7 +21,7 @@ return new class extends Migration
                 'Processing',
                 'Shipped',
                 'Delivered',
-                'Canceled'])->default('Pending');
+                'Cancelled'])->default('Pending');
             $table->string('shipping_address');
             $table->string('payment_method')->nullable();
             $table->timestamps();

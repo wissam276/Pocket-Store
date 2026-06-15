@@ -23,11 +23,14 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    /// forget password
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    /// reset password
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::get('/profile', function (Request $request) {
         return $request->user();
     });
     Route::put('/profile/update', [AuthController::class, 'updateProfile']);
-
     /// CRUD operations on basket
     Route::apiResource('BasketOfCustomer', BasketController::class);
     // اذا اردنا تعديل عنصر معين في السلة
