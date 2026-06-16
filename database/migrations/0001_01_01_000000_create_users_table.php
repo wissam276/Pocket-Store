@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone_number')->unique();
             $table->string('avatar')->nullable();
+            $table->string('address');
             $table->enum('role', ['admin', 'customer'])->default('customer');
             $table->boolean('is_active')->default(true);
             $table->string('password');

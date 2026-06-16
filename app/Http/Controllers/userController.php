@@ -24,6 +24,7 @@ class userController extends Controller
             'email' => 'required|unique:users|email',
             'password' => 'required|min:8',
             'avatar' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'address' => 'required',
         ]);
         $validated['password'] = Hash::make($validated['password']);
 
@@ -51,6 +52,7 @@ class userController extends Controller
                 'email' => $user->email,
                 'password' => $user->password,
                 'avatar' => $user->avatar ? asset('storage/' . $user->avatar) : null,
+                 'address'=>$user->address,
                  'role' => $user->role,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,

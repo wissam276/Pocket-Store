@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::put('/profile/update', [AuthController::class, 'updateProfile']);
+    Route::get('/my-orders', [OrderController::class, 'getUserOrders']);
     /// CRUD operations on basket
     Route::apiResource('BasketOfCustomer', BasketController::class);
     // اذا اردنا تعديل عنصر معين في السلة

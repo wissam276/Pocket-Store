@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             'password'=>Hash::make('password'),
             'phone_number'=>'0123456789',
             'role'=>'admin',
+            'address'=>'test address',
         ]);
         User::factory(3)->create(['role' => 'customer']);
 

@@ -46,13 +46,13 @@ class OrderController extends Controller {
     {
 
         $request->validate([
-            'shipping_address' => 'required|string|max:255',
+            'shipping_address' => 'sometimes|string|max:255',
             'payment_method'   => 'required|in:COD,card',
         ]);
 
         $user = $request->user();
         $basketItems = Basket::where('user_id', $user->id)->get();
-
+        $finalShippingAddress = $request->shipping_address ?? $user->address;
 
         if ($basketItems->isEmpty()) {
             return response()->json(['message' => 'Basket is empty'], 400);
@@ -76,7 +76,7 @@ class OrderController extends Controller {
                 'user_id' => $user->id,
                 'total_price' => $totalPrice,
                 'status' => 'Pending',
-                'shipping_address' => $request->shipping_address,
+                'shipping_address' => $finalShippingAddress,
                 'payment_method' => 'COD'
             ]);
 
@@ -101,13 +101,24 @@ class OrderController extends Controller {
             return response()->json([
                 'success' => true,
                 'message' => 'Your request has been successfully submitted.',
-                'total_account' => $totalPrice
+                'total_account' => $totalPrice,
+                'address' => $finalShippingAddress,
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 422);
         }
+    }
+    public function getUserOrders(Request $request)
+    {
+        $orders = $request->user()->orders()->latest()->get();
+
+        return response()->json([
+            'status' => true,
+            'count' => $orders->count(),
+            'data' => $orders
+        ]);
     }
 
 

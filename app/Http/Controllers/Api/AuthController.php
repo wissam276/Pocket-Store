@@ -23,6 +23,7 @@ class AuthController extends Controller
             'password' => 'required|min:6|max:20|confirmed',
             'phone_number' => 'required|unique:users',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'address' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -136,6 +137,8 @@ class AuthController extends Controller
             'phone_number'  => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'address' => 'sometimes|string|max:255',
         ]);
 
         if ($request->has('first_name')) $user->first_name  = $request->first_name;
@@ -144,7 +147,10 @@ class AuthController extends Controller
         if ($request->has('email')) $user->email = $request->email;
         if ($request->has('email')) $user->email = $request->email;
         if ($request->has('password')) $user->password = bcrypt($request->password);
-
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
         $user->save();
 
         return response()->json([
