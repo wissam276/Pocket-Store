@@ -73,6 +73,7 @@ class userController extends Controller
             'email'        => 'sometimes|email|unique:users,email,' . $user->id,
             'password'     => 'sometimes|min:8',
             'avatar' => 'sometimes|image',
+            'address' => 'sometimes|string',
         ]);
 
         // معالجة كلمة السر إذا تم إرسالها
