@@ -159,6 +159,16 @@ class ItemController extends Controller
             $validated['item_image'] = $request->file('item_image')->store('items', 'public');
         }
 
+        if ($request->has('DiscountPercentage')) {
+            $discount = $request->DiscountPercentage;
+            $price = $request->price ?? $item->price;
+
+            $validated['priceAfterDiscount'] = $price - ($price * ($discount / 100));
+        }
+        elseif ($request->has('price') && $item->DiscountPercentage) {
+            $validated['priceAfterDiscount'] = $request->price - ($request->price * ($item->DiscountPercentage / 100));
+        }
+
         $item->update($validated);
 
         return new ItemApiResource($item);
