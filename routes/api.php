@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\userController;
+use App\Http\Controllers\WishlistController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -86,7 +87,14 @@ Route::middleware(['auth:sanctum','admin'])->prefix('admin')->group(function () 
         /// CRUD operations on orders
         Route::apiResource('orders',OrderController::class);
 });
-
+// wishlist apis
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+    Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
+    Route::get('/wishlist', [WishlistController::class, 'viewWishlist']);
+    Route::post('/wishlist/clear', [WishlistController::class, 'clearWishlist']);
+    Route::post('/wishlist/move-to-basket', [WishlistController::class, 'moveToBasket']);
+});
 
 
 

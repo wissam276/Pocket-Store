@@ -24,4 +24,7 @@ class Item extends Model
     public function baskets(){
         return $this->hasMany(Basket::class);
     }
+    public function wishlists(){
+        return $this->belongsToMany(Wishlist::class);
+    }
 }
