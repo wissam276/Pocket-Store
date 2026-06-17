@@ -76,6 +76,14 @@ class ItemController extends Controller
         if ($request->has('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
+        if ($request->has('rating')) {
+            $query->whereHas('ratings', function ($q) use ($request) {
+                $q->where('rating', '>=', $request->input('rating'));
+            });
+        }
+        if( $request->has('availability')) {
+            $query->where('availability', $request->input('availability'));
+        }
         $items = $query->get();
         return response()->json($items, 200);
     }
