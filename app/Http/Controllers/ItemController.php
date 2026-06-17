@@ -204,4 +204,21 @@ class ItemController extends Controller
         return new ItemApiResource($item);
     }
 
+    //------------------------------------------------
+    public function Rating (Request $request)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'item_id' => 'required|exists:items,id',
+        ]);
+
+        $user = Auth::user();
+        $item = Item::findOrFail($request->item_id);
+        $item->ratings()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['rating' => $request->rating]
+        );
+        return response()->json(['message' => 'Rating submitted successfully']);
+    }
+
 }

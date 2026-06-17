@@ -27,4 +27,13 @@ class Item extends Model
     public function wishlists(){
         return $this->belongsToMany(Wishlist::class);
     }
+    public function ratings(){
+        return $this->hasMany(Rating::class);
+    }
+   public function updateAverageRating()
+{
+    $average = $this->ratings()->avg('rating');
+    $this->rating = $average ? round($average, 2) : 0;
+    $this->save();
+}
 }

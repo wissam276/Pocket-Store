@@ -25,6 +25,7 @@ return new class extends Migration
             $table->decimal('priceAfterDiscount', 8, 2)->nullable();
             $table->decimal('DiscountPercentage', 5, 2)->nullable();
             $table->boolean('availability')->default(true);
+            $table->decimal('rating', 3, 2)->default(0);
             // Media
             $table->string( 'item_image');
             $table->json( 'details_image');
