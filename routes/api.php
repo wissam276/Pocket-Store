@@ -9,6 +9,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\userController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CouponController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('filter', [ItemController::class, 'filteringItem']);
         Route::get('itemDetails', [ItemController::class, 'ItemDetails']);
         Route::get('itemsWithSales', [ItemController::class, 'itemsWithSales']);
+        Route::get('coupons', [CouponController::class, 'index']);
 
 
 //==================================================================================
@@ -86,6 +88,12 @@ Route::middleware(['auth:sanctum','admin'])->prefix('admin')->group(function () 
         Route::get('/customers/{customer}/orders',[UserController::class,'orders']);
         /// CRUD operations on orders
         Route::apiResource('orders',OrderController::class);
+        /// CRUD operations on coupons and offers
+        Route::get('coupons', [CouponController::class, 'adminIndex']);
+        Route::post('coupons', [CouponController::class, 'store']);
+        Route::put('coupons/{coupon}', [CouponController::class, 'update']);
+        Route::patch('coupons/{coupon}', [CouponController::class, 'update']);
+        Route::delete('coupons/{coupon}', [CouponController::class, 'destroy']);
 });
 // wishlist apis
 Route::middleware('auth:sanctum')->group(function () {

@@ -23,16 +23,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        User::factory()->create([
-            'first_name' => 'wissam',
-            'second_name' => 'admin',
-            'email'=>'wissam@ecommerce.com',
-            'password'=>Hash::make('password'),
-            'phone_number'=>'0123456789',
-            'role'=>'admin',
-            'address'=>'test address',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@pocketshop.com'],
+            [
+                'first_name' => 'Admin',
+                'second_name' => 'User',
+                'password' => Hash::make('admin123'),
+                'phone_number' => '0123456789',
+                'role' => 'admin',
+                'address' => 'Damascus',
+            ],
+        );
         User::factory(3)->create(['role' => 'customer']);
+
+        $this->call(CouponSeeder::class);
 
         foreach (Category::DEFAULT_CATEGORIES as $name) {
             $category = Category::create([

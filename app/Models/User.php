@@ -18,7 +18,10 @@ use Laravel\Sanctum\HasApiTokens;
     'phone_number',
     'address',
     'password',
-    'avatar',])]
+    'avatar',
+    'role',
+    'is_active',
+])]
 
 
 #[Hidden(['password', 'remember_token'])]

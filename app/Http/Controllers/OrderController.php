@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Basket;
-use App\Models\Item;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\orderItems;
 use Illuminate\Http\Request;
@@ -47,12 +47,18 @@ class OrderController extends Controller {
 
         $request->validate([
             'shipping_address' => 'sometimes|string|max:255',
-            'payment_method'   => 'required|in:COD,card',
+            'city' => 'sometimes|nullable|string|max:255',
+            'delivery_method' => 'sometimes|in:standard,express',
+            'payment_method'   => 'required|in:COD,cod,card',
+            'notes' => 'sometimes|nullable|string|max:1000',
+            'coupon_code' => 'sometimes|nullable|string|max:50',
         ]);
 
         $user = $request->user();
-        $basketItems = Basket::where('user_id', $user->id)->get();
+        $basketItems = Basket::where('user_id', $user->id)->with('item')->get();
         $finalShippingAddress = $request->shipping_address ?? $user->address;
+        $deliveryMethod = $request->delivery_method ?? 'standard';
+        $paymentMethod = strtolower($request->payment_method) === 'card' ? 'card' : 'COD';
 
         if ($basketItems->isEmpty()) {
             return response()->json(['message' => 'Basket is empty'], 400);
@@ -60,49 +66,119 @@ class OrderController extends Controller {
 
         DB::beginTransaction();
         try {
-            $totalPrice = 0;
+            $subtotal = 0;
+            $orderLines = [];
 
             foreach ($basketItems as $basketItem) {
-                $item = Item::find($basketItem->item_id);
+                $item = $basketItem->item;
+
+                if (! $item) {
+                    throw new \Exception('One of the basket items no longer exists');
+                }
+
                 if ($item->quantity < $basketItem->quantity) {
                     throw new \Exception("the required quantity of ({$item->name}) is not available");
                 }
-                $price = $item->priceAfterDiscount ?? $item->price;
-                $totalPrice += $price * $basketItem->quantity;
-                $unitPrice = $item->priceAfterDiscount ?? $item->price;
+
+                $unitPrice = (float) ($item->priceAfterDiscount ?? $item->price);
+                $quantity = (int) $basketItem->quantity;
+                $subtotal += $unitPrice * $quantity;
+                $orderLines[] = [
+                    'item' => $item,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                ];
             }
+
+            $deliveryCost = $this->deliveryCostFor($subtotal, $deliveryMethod);
+            $coupon = null;
+            $couponDiscount = 0;
+
+            if ($request->filled('coupon_code')) {
+                $couponCode = strtoupper(trim($request->coupon_code));
+                $coupon = Coupon::where('code', $couponCode)->lockForUpdate()->first();
+
+                if (! $coupon) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'Coupon code is invalid.'], 422);
+                }
+
+                if (! $coupon->canApplyTo($subtotal)) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'Coupon is not available for this order.'], 422);
+                }
+
+                $couponDiscount = $coupon->discountFor($subtotal);
+
+                if ($coupon->type === Coupon::TYPE_FREE_SHIPPING) {
+                    $deliveryCost = 0;
+                }
+            }
+
+            $totalPrice = max($subtotal - $couponDiscount + $deliveryCost, 0);
 
             $order = Order::create([
                 'user_id' => $user->id,
+                'subtotal_price' => $subtotal,
                 'total_price' => $totalPrice,
                 'status' => 'Pending',
                 'shipping_address' => $finalShippingAddress,
-                'payment_method' => 'COD'
+                'payment_method' => $paymentMethod,
+                'coupon_id' => $coupon?->id,
+                'coupon_code' => $coupon?->code,
+                'coupon_type' => $coupon?->type,
+                'coupon_discount' => $couponDiscount,
+                'delivery_method' => $deliveryMethod,
+                'delivery_cost' => $deliveryCost,
+                'city' => $request->city,
+                'notes' => $request->notes,
             ]);
 
-            foreach ($basketItems as $basketItem) {
-                $item = Item::find($basketItem->item_id);
+            $itemsForResponse = [];
+
+            foreach ($orderLines as $line) {
+                $item = $line['item'];
+                $quantity = $line['quantity'];
+                $unitPrice = $line['unit_price'];
 
                 orderItems::create([
                     'order_id' => $order->id,
-                    'item_id'  => $basketItem->item_id,
-                    'quantity' => $basketItem->quantity,
+                    'item_id'  => $item->id,
+                    'quantity' => $quantity,
                     'price'       => $unitPrice,
-                    'total_price' => $unitPrice * $basketItem->quantity,
+                    'total_price' => $unitPrice * $quantity,
                 ]);
 
-                $item->quantity -= $basketItem->quantity;
+                $itemsForResponse[] = "{$item->name} x {$quantity}";
+
+                $item->quantity -= $quantity;
                 $item->save();
+            }
+
+            if ($coupon) {
+                $coupon->increment('usage_count');
             }
 
             Basket::where('user_id', $user->id)->delete();
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Your request has been successfully submitted.',
-                'total_account' => $totalPrice,
+                'id' => $order->id,
+                'databaseId' => $order->id,
+                'status' => $order->status,
+                'subtotal' => (float) $subtotal,
+                'discount' => (float) $couponDiscount,
+                'delivery' => (float) $deliveryCost,
+                'total' => (float) $totalPrice,
+                'couponCode' => $coupon?->code,
+                'couponType' => $coupon?->type,
                 'address' => $finalShippingAddress,
+                'city' => $request->city,
+                'deliveryMethod' => $deliveryMethod,
+                'payment' => $paymentMethod === 'card' ? 'Card payment' : 'Cash on delivery',
+                'paid' => $paymentMethod === 'card',
+                'customer' => $user->name,
+                'items' => $itemsForResponse,
             ], 201);
 
         } catch (\Exception $e) {
@@ -110,6 +186,16 @@ class OrderController extends Controller {
             return response()->json(['message' => $e->getMessage()], 422);
         }
     }
+
+    private function deliveryCostFor(float $subtotal, string $deliveryMethod): float
+    {
+        if ($subtotal > 300 || $subtotal === 0.0) {
+            return 0.0;
+        }
+
+        return $deliveryMethod === 'express' ? 20.0 : 12.0;
+    }
+
     public function getUserOrders(Request $request)
     {
         $orders = $request->user()->orders()->latest()->get();
@@ -124,4 +210,3 @@ class OrderController extends Controller {
 
 
 }
-
