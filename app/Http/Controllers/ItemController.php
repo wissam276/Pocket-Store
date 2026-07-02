@@ -225,8 +225,21 @@ class ItemController extends Controller
         $item->ratings()->updateOrCreate(
             ['user_id' => $user->id],
             ['rating' => $request->rating]
+            ['comment' => $request->comment ?? null]
         );
         return response()->json(['message' => 'Rating submitted successfully']);
+    }
+//-------------------------------------------------
+    public function getComments(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required|exists:items,id',
+        ]);
+
+        $item = Item::findOrFail($request->item_id);
+        $comments = $item->ratings()->whereNotNull('comment')->get(['user_id', 'comment', 'created_at']);
+
+        return response()->json($comments);
     }
 
 }

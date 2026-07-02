@@ -96,5 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/move-to-basket', [WishlistController::class, 'moveToBasket']);
 });
 
+Route::get('/comments', [ItemController::class, 'getComments']);
+
 
 ////// testtt
