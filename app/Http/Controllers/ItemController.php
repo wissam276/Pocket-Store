@@ -181,12 +181,7 @@ class ItemController extends Controller
 
         return new ItemApiResource($item);
     }
-
-
-
-
-
-
+//-------------------------------------------------
     public function ItemsWithSales()
     {
         $items = Item::with('sales')->get();
@@ -202,11 +197,6 @@ class ItemController extends Controller
         return response()->json($items, 200);
     }
 //-----------------------------------------------------------------------
-
-
-
-
-
     public function show(Item $item)
     {
         return new ItemApiResource($item);
@@ -241,5 +231,6 @@ class ItemController extends Controller
 
         return response()->json($comments);
     }
+//-------------------------------------------------
 
 }

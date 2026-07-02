@@ -54,7 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
         Route::get('categories', [CategoryController::class, 'index']);
-        Route::get('topSellingItems', [ItemController::class, 'topSellingItems']);
+        Route::get('topSellingItems', [ItemController::class, 'topSelling']);
         Route::get('itemsByCategory',[ItemController::class, 'itemsByCategory']);
         Route::get('search', [ItemController::class, 'search']);
         Route::get('filter', [ItemController::class, 'filteringItem']);
@@ -87,7 +87,9 @@ Route::middleware(['auth:sanctum','admin'])->prefix('admin')->group(function () 
         /// CRUD operations on orders
         Route::apiResource('orders',OrderController::class);
 });
+
 // wishlist apis
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
     Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
@@ -96,7 +98,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/move-to-basket', [WishlistController::class, 'moveToBasket']);
 });
 
-Route::get('/comments', [ItemController::class, 'getComments']);
+// comments and ratings apis
 
+Route::get('/comments', [ItemController::class, 'getComments']);
+Route::post('/rating', [ItemController::class, 'Rating'])->middleware('auth:sanctum');
 
 ////// testtt
