@@ -30,10 +30,24 @@ class Item extends Model
     public function ratings(){
         return $this->hasMany(Rating::class);
     }
-   public function updateAverageRating()
-{
-    $average = $this->ratings()->avg('rating');
-    $this->rating = $average ? round($average, 2) : 0;
-    $this->save();
-}
+
+
+    public function getAverageRatingAttribute()
+    {
+
+        $ratings = $this->ratings()->whereNotNull('rating');
+
+        if ($ratings->count() === 0) {
+            return 0;
+        }
+
+        return round($ratings->avg('rating'), 1);
+    }
+
+
+    public function updateAverageRating()
+    {
+        $average = $this->ratings()->avg('rating');
+        $this->update(['rating' => $average]);
+    }
 }

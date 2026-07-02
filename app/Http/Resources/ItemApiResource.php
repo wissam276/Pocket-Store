@@ -7,14 +7,33 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ItemApiResource extends JsonResource
 {
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'price' => $this->price,
-            'image_url' => asset('storage/' . $this->item_image),
-            'category' => $this->category ? $this->category->name : null,
+            'id'                => $this->id,
+            'name'              => $this->name,
+            'slug'              => $this->slug,
+            'price'             => $this->price,
+            'priceAfterDiscount'=> $this->priceAfterDiscount,
+            'description'       => $this->description,
+            'company'           => $this->company,
+            'availability'      => (bool) $this->availability,
+            'item_image'        => asset('storage/' . $this->item_image),
+            'details_images'    => array_map(fn($path) => asset('storage/' . $path), json_decode($this->details_image, true) ?? []),
+
+            'stats' => [
+                'average_rating' => $this->average_rating,
+                'ratings_count'  => $this->ratings()->count(),
+            ],
+
+            'reviews' => $this->ratings->map(function ($rating) {
+                return [
+                    'user'    => $rating->user->name ?? 'مستخدم',
+                    'rating'  => $rating->rating,
+                    'comment' => $rating->comment,
+                    'date'    => $rating->created_at->diffForHumans(),
+                ];
+            }),
         ];
     }
 }

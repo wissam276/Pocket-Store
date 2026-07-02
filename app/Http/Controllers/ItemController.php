@@ -88,13 +88,15 @@ class ItemController extends Controller
         return response()->json($items, 200);
     }
 //-------------------------------------------------------
-    public function ItemDetails(Request $request){
+    public function ItemDetails(Request $request)
+    {
         $request->validate([
             'item_id' => 'required|exists:items,id',
         ]);
-        $itemId = $request->input('item_id');
-        $item = Item::with('category')->findOrFail($itemId);
-        return response()->json($item, 200);
+
+        $item = Item::with(['category', 'ratings.user'])->findOrFail($request->item_id);
+
+        return new ItemApiResource($item);
     }
 //--------------------------------------------------
     public function store(Request $request)
@@ -114,7 +116,7 @@ class ItemController extends Controller
             'availability' => 'boolean',
             'item_image' => 'required|image|max:2048',
             'details_image' => 'nullable|array',
-            'details_image.*' => 'image|max:2048',
+            'details_image.*' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('item_image')) {
@@ -129,7 +131,6 @@ class ItemController extends Controller
             $validated['details_image'] = json_encode($paths);
         }
 
-        // 3. إنشاء المنتج
         $item = Item::create($validated);
 
 
@@ -207,26 +208,46 @@ class ItemController extends Controller
 
 
 
-    public function show(Item $item)
+
+    public function show($id)
     {
+        $item = Item::with(['category', 'ratings.user'])->findOrFail($id);
+
         return new ItemApiResource($item);
     }
 
     //------------------------------------------------
-    public function Rating (Request $request)
+    public function Rating(Request $request)
     {
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
             'item_id' => 'required|exists:items,id',
+            'rating'  => 'nullable|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
         ]);
 
+        if (!$request->has('rating') && !$request->has('comment')) {
+            return response()->json(['message' => 'rate or comment needed'], 422);
+        }
+
         $user = Auth::user();
-        $item = Item::findOrFail($request->item_id);
-        $item->ratings()->updateOrCreate(
-            ['user_id' => $user->id],
-            ['rating' => $request->rating]
+
+        $data = [];
+        if ($request->has('rating')) {
+            $data['rating'] = $request->rating;
+        }
+        if ($request->has('comment')) {
+            $data['comment'] = $request->comment;
+        }
+
+        \App\Models\Rating::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'item_id' => $request->item_id
+            ],
+            $data
         );
-        return response()->json(['message' => 'Rating submitted successfully']);
+
+        return response()->json(['message' => 'saved']);
     }
 
 }

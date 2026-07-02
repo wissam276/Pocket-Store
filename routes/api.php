@@ -36,13 +36,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-orders', [OrderController::class, 'getUserOrders']);
     /// CRUD operations on basket
     Route::apiResource('BasketOfCustomer', BasketController::class);
-    // اذا اردنا تعديل عنصر معين في السلة
-    //    Route::put('/BasketOfCustomer/{id}', [BasketController::class, 'update']);
-    //    Route::delete('/BasketOfCustomer/{id}', [BasketController::class, 'destroy']);
     /// CRUD operations on order
     Route::apiResource('orderOfCustomer', OrderController::class);
     ///make order from basket
     Route::post('checkout',[OrderController::class,'checkout']);
+    //// add rating and comment
+    Route::post('/items/rate', [ItemController::class, 'Rating']);
 });
 
 
@@ -104,5 +103,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wishlist/move-to-basket', [WishlistController::class, 'moveToBasket']);
 });
 
-
-////// testtt
