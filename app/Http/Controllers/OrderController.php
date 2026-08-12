@@ -206,7 +206,23 @@ class OrderController extends Controller {
             'data' => $orders
         ]);
     }
+//------------------------------------------------------------
+public function Orderdetails(Request $request)
+{
+    $id=Auth::user()->id;
+    $order = Order::with('orderItems.item')->findOrFail($id);
 
+    if ($order->user_id !== $request->user()->id) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    return response()->json([
+        'status' => true,
+        'data' => $order
+    ]);
+
+
+}
 
 
 }

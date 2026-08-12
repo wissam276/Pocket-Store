@@ -56,4 +56,68 @@ public function listUsers(){
             'users' => User::all()
         ]);
 }
+//-------------------------------------------------------------------------
+public function toggleProductStatus(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:items,id',
+        ]);
+        $item = Item::findOrFail($request->product_id);
+        $item->availability = !$item->availability; // أو الاعتماد على حقل تفعيل خاص إن وجد
+        $item->save();
+
+        return response()->json([
+            'message' => 'Product status updated successfully',
+            'product' => $item
+        ], 200);
+    }
+    //------------------------------------------------------
+    public function toggleCatigoryStatus(Request $request)
+    {
+        $id=$request->input('category_id');
+        $category = Category::findOrFail($id);
+        // افترض أن لديك حقل is_active في جدول التصنيفات
+        $category->is_active = !$category->is_active;
+        $category->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Category status updated successfully',
+            'data' => $category
+        ], 200);
+    }
+    //------------------------------------------------------
+    public function salesReport()
+    {
+        // استخراج المبيعات مرتبة حسب الأشهر للعام الحالي
+        $monthlySales = Order::selectRaw('SUM(total_price) as total, MONTH(created_at) as month')
+            ->where('status', '!=', 'Cancelled')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $totalSalesAllTime = Order::where('status', '!=', 'Cancelled')->sum('total_price');
+
+        return response()->json([
+            'status' => true,
+            'total_sales' => $totalSalesAllTime,
+            'monthly_sales' => $monthlySales
+        ], 200);
+    }
+    //---------------------------------------------------------------
+    public function customerDetailsWithOrders($id)
+    {
+        $customer = User::where('id', $id)->where('role', 'customer')->with('orders')->firstOrFail();
+        
+        // حساب إجمالي مشتريات العميل للطلبات غير الملغاة
+        $totalSpent = $customer->orders()->where('status', '!=', 'Cancelled')->sum('total_price');
+
+        return response()->json([
+            'status' => true,
+            'customer' => $customer,
+            'total_spent' => $totalSpent,
+            'orders_count' => $customer->orders->count()
+        ], 200);
+    }
 }

@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('itemDetails', [ItemController::class, 'ItemDetails']);
         Route::get('itemsWithSales', [ItemController::class, 'itemsWithSales']);
         Route::get('coupons', [CouponController::class, 'index']);
+        Route::get('sortedItems', [ItemController::class, 'sortItems']);
 
 
 //==================================================================================
@@ -79,6 +80,11 @@ Route::middleware(['auth:sanctum','admin'])->prefix('admin')->group(function () 
         Route::apiResource('/customer', UserController::class);
         /// edit status of user between active & block
         Route::patch('/customer/{id}/toggle-status', [AdminController::class, 'toggleUserStatus']);
+        Route::patch('/toggleItem',[AdminController::class,'toggleProductStatus']);
+        Route::patch('toggleCatigory',[AdminController::class,'toggleCatigoryStatus']);
+        Route::get('customerOrders',[AdminController::class,'customerDetailsWithOrders']);
+        Route::get('salesReport',[AdminController::class,'salesReport']);
+        Route::get('listUsers',[AdminController::class,'listUsers']);
         /// CRUD operation on items
         Route::apiResource('items', ItemController::class);
         /// CRUD operations on categories

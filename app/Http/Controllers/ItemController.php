@@ -249,5 +249,32 @@ class ItemController extends Controller
 
         return response()->json(['message' => 'saved']);
     }
+//-------------------------------------------------------------
+public function sortItems(Request $request)
+    {
+        $sortBy = $request->input('sort_by', 'latest'); 
+        $query = Item::query();
 
+        switch ($sortBy) {
+            case 'price_low':
+                fn_sort_low:
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'rating':
+                $query->withAvg('ratings', 'rating')->orderBy('ratings_avg_rating', 'desc');
+                break;
+            case 'sales':
+                $query->orderBy('sales_count', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        return response()->json($query->paginate(10), 200);
+    }
 }
