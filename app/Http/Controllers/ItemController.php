@@ -51,17 +51,14 @@ class ItemController extends Controller
     }
 
 //-----------------------------------------------------------
-    public function search(Request $request)
+public function scopeSearch($query, $term)
     {
-        $searchQuery = $request->input('query');
-        $items = Item::where('accepted', 'accepted')
-            ->where(function($q) use ($searchQuery) {
-                $q->where('name', 'like', "%$searchQuery%")
-                    ->orWhere('description', 'like', "%$searchQuery%")
-                    ->orWhere('company', 'like', "%$searchQuery%");
-            })->paginate(10);
-
-        return response()->json($items, 200);
+        return $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', '%' . $term . '%')
+              ->orWhere('description', 'like', '%' . $term . '%')
+              ->orWhere('short_description', 'like', '%' . $term . '%')
+              ->orWhere('company', 'like', '%' . $term . '%');
+        });
     }
 
 //-----------------------------------------------------------
