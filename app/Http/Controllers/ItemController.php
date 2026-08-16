@@ -26,7 +26,7 @@ class ItemController extends Controller
         $item->delete();
 
         return response()->json([
-            'message' => 'تم حذف المنتج بنجاح'
+            'message' => 'deleted succssfully'
         ], 200);
     }
 
@@ -54,16 +54,27 @@ class ItemController extends Controller
     public function search(Request $request)
     {
         $searchQuery = $request->input('query');
-        $items = Item::where('accepted', 'accepted')
-            ->where(function($q) use ($searchQuery) {
-                $q->where('name', 'like', "%$searchQuery%")
-                    ->orWhere('description', 'like', "%$searchQuery%")
-                    ->orWhere('company', 'like', "%$searchQuery%");
-            })->paginate(10);
 
-        return response()->json($items, 200);
+        // تم حذفwhere('accepted', 'accepted') لأن العمود غير موجود
+        $items = Item::where(function($q) use ($searchQuery) {
+            $q->where('name', 'like', "%$searchQuery%")
+                ->orWhere('description', 'like', "%$searchQuery%")
+                ->orWhere('company', 'like', "%$searchQuery%");
+        })->paginate(10);
+
+        return ItemApiResource::collection($items);
     }
 
+    //----------------------------------------------------------------
+    public function latestItems()
+    {
+        $items = Item::with('category')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        return ItemApiResource::collection($items);
+    }
 //-----------------------------------------------------------
     public function filteringItem(Request $request){
         $query = Item::query();
@@ -190,9 +201,17 @@ class ItemController extends Controller
 
     public function ItemsWithSales()
     {
-        $items = Item::with('sales')->get();
-        return response()->json($items, 200);
+        $items = Item::with('category')
+            ->where('DiscountPercentage', '>', 0)
+            ->get();
+
+        return ItemApiResource::collection($items);
     }
+
+
+
+
+
 //----------------------------------------------------------------
     public function topSelling()
     {

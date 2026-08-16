@@ -53,13 +53,14 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
 
+        Route::get('latestItems',[ItemController::class,'latestItems']);
         Route::get('categories', [CategoryController::class, 'index']);
-        Route::get('topSellingItems', [ItemController::class, 'topSellingItems']);
+        Route::get('topSelling',[ItemController::class,'topSelling']);
         Route::get('itemsByCategory',[ItemController::class, 'itemsByCategory']);
         Route::get('search', [ItemController::class, 'search']);
         Route::get('filter', [ItemController::class, 'filteringItem']);
         Route::get('itemDetails', [ItemController::class, 'ItemDetails']);
-        Route::get('itemsWithSales', [ItemController::class, 'itemsWithSales']);
+        Route::get('itemsWithSales', [ItemController::class, 'ItemsWithSales']);
         Route::get('coupons', [CouponController::class, 'index']);
 
 
@@ -75,6 +76,8 @@ Route::middleware(['auth:sanctum','admin'])->prefix('admin')->group(function () 
         Route::get('topSelling',[ItemController::class,'topSelling']);
         /// show the items With Sales
         Route::get('itemWithSales',[ItemController::class,'ItemsWithSales']);
+        /// recently added items
+        Route::get('latestItems',[ItemController::class,'latestItems']);
         /// CRUD operations on the users
         Route::apiResource('/customer', UserController::class);
         /// edit status of user between active & block
