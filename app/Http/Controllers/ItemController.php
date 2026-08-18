@@ -55,7 +55,6 @@ class ItemController extends Controller
     {
         $searchQuery = $request->input('query');
 
-        // تم حذفwhere('accepted', 'accepted') لأن العمود غير موجود
         $items = Item::where(function($q) use ($searchQuery) {
             $q->where('name', 'like', "%$searchQuery%")
                 ->orWhere('description', 'like', "%$searchQuery%")
@@ -76,28 +75,42 @@ class ItemController extends Controller
         return ItemApiResource::collection($items);
     }
 //-----------------------------------------------------------
-    public function filteringItem(Request $request){
+    public function filteringItem(Request $request)
+    {
         $query = Item::query();
+
         if ($request->has('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
         }
+
         if ($request->has('max_price')) {
             $query->where('price', '<=', $request->input('max_price'));
         }
+
         if ($request->has('category_id')) {
             $query->where('category_id', $request->input('category_id'));
         }
-        if ($request->has('rating')) {
-            $query->whereHas('ratings', function ($q) use ($request) {
-                $q->where('rating', '>=', $request->input('rating'));
-            });
-        }
-        if( $request->has('availability')) {
+
+        if ($request->has('availability')) {
             $query->where('availability', $request->input('availability'));
         }
+
+        $query->withAvg('ratings', 'rating');
+
+        if ($request->has('rating')) {
+            $query->having('ratings_avg_rating', '>=', $request->input('rating'));
+        }
+
         $items = $query->get();
+
+        $items->each(function ($item) {
+            $item->rating = round($item->ratings_avg_rating ?? 0, 1);
+        });
+
         return response()->json($items, 200);
     }
+
+
 //-------------------------------------------------------
     public function ItemDetails(Request $request)
     {
@@ -142,8 +155,16 @@ class ItemController extends Controller
             $validated['details_image'] = json_encode($paths);
         }
 
-        $item = Item::create($validated);
+        if (isset($validated['DiscountPercentage']) && $validated['DiscountPercentage'] > 0) {
+            $price = $validated['price'];
+            $discount = $validated['DiscountPercentage'];
+            $validated['priceAfterDiscount'] = $price - ($price * ($discount / 100));
+        } else {
+            $validated['DiscountPercentage'] = 0;
+            $validated['priceAfterDiscount'] = $validated['price'];
+        }
 
+        $item = Item::create($validated);
 
         return new ItemApiResource($item);
     }

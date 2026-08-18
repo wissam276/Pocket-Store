@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::put('/profile/update', [AuthController::class, 'updateProfile']);
     Route::get('/my-orders', [OrderController::class, 'getUserOrders']);
+
     /// CRUD operations on basket
     Route::apiResource('BasketOfCustomer', BasketController::class);
     /// CRUD operations on order
@@ -51,8 +52,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/items', function () {
             return ItemApiResource::collection(Item::with('category')->get());
         });
-
-
         Route::get('latestItems',[ItemController::class,'latestItems']);
         Route::get('categories', [CategoryController::class, 'index']);
         Route::get('topSelling',[ItemController::class,'topSelling']);

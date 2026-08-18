@@ -42,10 +42,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    /**
+     * Get the user's wishlist.
+     */
+    public function wishlist()
+    {
+        return $this->hasOne(Wishlist::class);
+    }
 
     public function getNameAttribute(): string
     {
         return "{$this->first_name} {$this->second_name}";
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
 }
