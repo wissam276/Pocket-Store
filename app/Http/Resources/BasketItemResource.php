@@ -20,7 +20,7 @@ class BasketItemResource extends JsonResource
             'item'=>[
                 'name'=>$this->item->name,
                 'price'=>$this->item->price,
-                'image'=>assert('storage/' .$this->item->image),
+                'image'=>asset('storage/' .$this->item->image),
             ]
         ];
     }
