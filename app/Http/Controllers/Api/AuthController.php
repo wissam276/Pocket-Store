@@ -96,7 +96,6 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        // إرسال رابط إعادة التعيين (يستخدم الإعدادات في config/auth.php)
         $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
@@ -132,28 +131,41 @@ class AuthController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'first_name'  => 'sometimes|string|max:255',
+            'first_name'   => 'sometimes|string|max:255',
             'second_name'  => 'sometimes|string|max:255',
-            'phone_number'  => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:8',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'address' => 'sometimes|string|max:255',
+            'phone_number' => 'sometimes|string|max:255',
+            'email'        => 'sometimes|email|unique:users,email,' . $user->id,
+            'old_password' => 'required_with:password|string', // مطلوبة حصراً إذا أراد تغيير كلمة المرور
+            'password'     => 'sometimes|string|min:8|confirmed', // يفضل إضافة confirmed للتأكيد
+            'avatar'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'address'      => 'sometimes|string|max:255',
         ]);
 
-        if ($request->has('first_name')) $user->first_name  = $request->first_name;
+        if ($request->has('first_name')) $user->first_name = $request->first_name;
         if ($request->has('second_name')) $user->second_name = $request->second_name;
         if ($request->has('phone_number')) $user->phone_number = $request->phone_number;
         if ($request->has('email')) $user->email = $request->email;
-        if ($request->has('email')) $user->email = $request->email;
-        if ($request->has('password')) $user->password = bcrypt($request->password);
+
+        if ($request->has('password')) {
+            if (!Hash::check($request->old_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'كلمة المرور القديمة غير صحيحة'
+                ], 422);
+            }
+
+            $user->password = Hash::make($request->password);
+        }
+
         if ($request->hasFile('avatar')) {
             $path = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $path;
         }
+
         $user->save();
 
         return response()->json([
+            'status' => true,
             'message' => 'your data has been updated successfully',
             'user'    => $user
         ]);

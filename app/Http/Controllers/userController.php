@@ -76,17 +76,14 @@ class userController extends Controller
             'address' => 'sometimes|string',
         ]);
 
-        // معالجة كلمة السر إذا تم إرسالها
         if (isset($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         }
 
-        // معالجة الصورة
         if ($request->hasFile('avatar')) {
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
-        // هنا الخطوة التي كانت ناقصة:
         $user->update($validated);
 
         return response()->json([
