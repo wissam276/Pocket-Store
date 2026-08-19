@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\CategoryController;
@@ -34,6 +35,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::put('/profile/update', [AuthController::class, 'updateProfile']);
     Route::get('/my-orders', [OrderController::class, 'getUserOrders']);
+
+    // favourites list
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+
+    // add item to favourites
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggleFavorite']);
+
+
 
     /// CRUD operations on basket
     Route::apiResource('BasketOfCustomer', BasketController::class);

@@ -32,6 +32,17 @@ class Item extends Model
     }
 
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteItems()
+    {
+        return $this->belongsToMany(Item::class, 'favorites', 'user_id', 'item_id');
+    }
+
+
     public function getAverageRatingAttribute()
     {
 

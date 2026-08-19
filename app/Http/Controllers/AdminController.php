@@ -46,7 +46,7 @@ class AdminController extends Controller
 public function listUsers(){
 
         $users = User::where('is_admin',false)
-            ->select(['id','name','email','role','is_active','created_at'])
+            ->select(['id','first_name','second_name','email','role','is_active','created_at'])
             ->paginate(10);
 
         return response()->json([
