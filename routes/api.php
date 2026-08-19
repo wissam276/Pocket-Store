@@ -21,15 +21,15 @@ use App\Http\Resources\ItemApiResource;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
+/// forget password
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+/// reset password
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 //here we need log-in
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
-    /// forget password
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    /// reset password
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
     Route::get('/profile', function (Request $request) {
         return $request->user();
     });
