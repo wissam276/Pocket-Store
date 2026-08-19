@@ -97,7 +97,6 @@ class BasketController extends Controller
             return response()->json(['message' => 'basket is empty !'], 200);
         }
 
-        // 2. حساب الإجمالي
         $total = $basketItems->sum(function ($basketItem) {
             $price = $basketItem->item->priceAfterDiscount ?? $basketItem->item->price;
             return $price * $basketItem->quantity;
