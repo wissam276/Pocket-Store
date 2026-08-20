@@ -46,8 +46,11 @@ class OrderController extends Controller {
     {
 
         $request->validate([
-            'shipping_address' => 'sometimes|string|max:255',
-            'city' => 'sometimes|nullable|string|max:255',
+            'government'   => 'sometimes|string|max:255',
+            'city'         => 'sometimes|string|max:255',
+            'street'       => 'sometimes|string|max:255',
+            'building'     => 'sometimes|string|max:255',
+            'apartment'    => 'sometimes|string|max:255',
             'delivery_method' => 'sometimes|in:standard,express',
             'payment_method'   => 'required|in:COD,cod,card',
             'notes' => 'sometimes|nullable|string|max:1000',
