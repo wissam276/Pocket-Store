@@ -145,7 +145,7 @@ class AuthController extends Controller
         if ($request->has('second_name')) $user->second_name = $request->second_name;
         if ($request->has('phone_number')) $user->phone_number = $request->phone_number;
         if ($request->has('email')) $user->email = $request->email;
-
+        if ($request->has('address')) $user->address = $request->address;
         if ($request->has('password')) {
             if (!Hash::check($request->old_password, $user->password)) {
                 return response()->json([
