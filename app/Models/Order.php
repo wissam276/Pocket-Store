@@ -22,7 +22,11 @@ class Order extends Model
         'coupon_discount',
         'delivery_method',
         'delivery_cost',
+        'government',
         'city',
+        'street',
+        'building',
+        'apartment',
         'notes',
     ];
     public function user(){

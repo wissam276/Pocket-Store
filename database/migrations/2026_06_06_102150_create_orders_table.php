@@ -23,6 +23,12 @@ return new class extends Migration
                 'Delivered',
                 'Cancelled'])->default('Pending');
             $table->string('shipping_address');
+            $table->string('government')->nullable();
+            $table->string('city')->nullable();
+            $table->string('street')->nullable();
+            $table->string('building')->nullable();
+            $table->string('apartment')->nullable();
+            $table->string('notes')->nullable();
             $table->string('payment_method')->nullable();
             $table->timestamps();
         });

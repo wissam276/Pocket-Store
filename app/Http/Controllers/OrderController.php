@@ -133,7 +133,11 @@ class OrderController extends Controller {
                 'coupon_discount' => $couponDiscount,
                 'delivery_method' => $deliveryMethod,
                 'delivery_cost' => $deliveryCost,
+                'government' => $request->government,
                 'city' => $request->city,
+                'street'=>$request->street,
+                'building'=>$request->building,
+                'apartment'=>$request->apartment,
                 'notes' => $request->notes,
             ]);
 
@@ -176,7 +180,12 @@ class OrderController extends Controller {
                 'couponCode' => $coupon?->code,
                 'couponType' => $coupon?->type,
                 'address' => $finalShippingAddress,
+                'government'=>$request->government,
                 'city' => $request->city,
+                'street'=>$request->street,
+                'building'=>$request->building,
+                'apartment'=>$request->apartment,
+                'notes'=>$request->notes,
                 'deliveryMethod' => $deliveryMethod,
                 'payment' => $paymentMethod === 'card' ? 'Card payment' : 'Cash on delivery',
                 'paid' => $paymentMethod === 'card',
@@ -190,6 +199,38 @@ class OrderController extends Controller {
         }
     }
 
+    public function customerUpdateAddress(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $order = Order::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+
+        // منع التعديل إذا لم يعد الطلب في حالة الانتظار (Pending)
+        if ($order->status !== 'Pending') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cannot modify order details because it is already being processed.'
+            ], 422);
+        }
+
+        $request->validate([
+            'city'      => 'sometimes|string|max:255',
+            'street'    => 'sometimes|string|max:255',
+            'building'  => 'sometimes|string|max:255',
+            'apartment' => 'sometimes|string|max:255',
+            'notes'     => 'sometimes|nullable|string|max:1000',
+        ]);
+
+        $order->update($request->only([
+            'government', 'city', 'street', 'building', 'apartment', 'notes'
+        ]));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Your order details have been updated successfully.',
+            'order' => $order
+        ]);
+    }
     private function deliveryCostFor(float $subtotal, string $deliveryMethod): float
     {
         if ($subtotal > 300 || $subtotal === 0.0) {

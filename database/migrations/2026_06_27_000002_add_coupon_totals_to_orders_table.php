@@ -16,8 +16,7 @@ return new class extends Migration
             $table->decimal('coupon_discount', 10, 2)->default(0);
             $table->string('delivery_method')->nullable();
             $table->decimal('delivery_cost', 10, 2)->default(0);
-            $table->string('city')->nullable();
-            $table->text('notes')->nullable();
+
         });
     }
 
@@ -33,8 +32,6 @@ return new class extends Migration
                 'coupon_discount',
                 'delivery_method',
                 'delivery_cost',
-                'city',
-                'notes',
             ]);
         });
     }

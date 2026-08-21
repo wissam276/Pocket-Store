@@ -25,6 +25,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 /// reset password
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+
+
+
+
 //here we need log-in
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -50,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('orderOfCustomer', OrderController::class);
     ///make order from basket
     Route::post('checkout',[OrderController::class,'checkout']);
+    ///edit address after order
+    Route::put('orders/{id}/editAddress', [OrderController::class, 'customerUpdateAddress']);
     //// add rating and comment
     Route::post('/items/rate', [ItemController::class, 'Rating']);
 });
